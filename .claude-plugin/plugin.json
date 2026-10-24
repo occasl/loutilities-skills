@@ -1,0 +1,11 @@
+{
+  "name": "loutilities-skills",
+  "version": "0.1.0",
+  "description": "Two Claude Code skills: route (send each request to the best model) and humanize (make AI-drafted prose read less formulaic).",
+  "author": {
+    "name": "lsacco"
+  },
+  "repository": "https://github.com/occasl/loutilities-skills",
+  "license": "MIT",
+  "keywords": ["skills", "routing", "model-routing", "writing", "humanize"]
+}

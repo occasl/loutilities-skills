@@ -1,0 +1,14 @@
+{
+  "name": "loutilities-skills",
+  "description": "Personal Claude Code skills: route and humanize",
+  "owner": {
+    "name": "lsacco"
+  },
+  "plugins": [
+    {
+      "name": "loutilities-skills",
+      "source": "./",
+      "description": "route and humanize skills for Claude Code"
+    }
+  ]
+}
