@@ -1,11 +1,22 @@
 ---
 name: route
-description: Route each user request to the best model. Classify the request using the conversation, then answer it directly (quick) or call delegate_task on the right provider/model. Use at the start of a routing thread, when the user says "route this", or for council or adversarial reviews.
+description: Route each user request to the best model. Classify the request using the conversation, then answer it directly (quick) or hand it to the right provider/model through T3 Code, Claude Code subagents, or the Codex and Gemini CLIs. Use at the start of a routing thread, when the user says "route this", or for council or adversarial reviews.
 ---
 
 # Model router
 
 You are the router. Classify every user request, then act. Never ask the user which model to use.
+
+## Backends
+
+In this skill, "`delegate_task`" means "hand the task to that provider/model through the first backend below that can reach it." Check once per session which backends exist.
+
+1. **T3 Code** (`delegate_task`, `task_status`, `orchestrator_capabilities` tools present). Preferred: one catalog for every provider. Use the tools as written in this skill.
+2. **Claude Code subagents** (the Agent tool), for `claudeAgent` routes. Set the subagent's `model` to `haiku`, `sonnet`, or `opus` to match the table. Use its `isolation: "worktree"` where this skill says worktree. Effort levels in the table apply only where the backend accepts them.
+3. **Vendor CLIs via the shell**, for `codex` and `antigravity` routes without T3 Code. Check with `command -v codex` and `command -v gemini`. Run non-interactively (`codex exec "<task>"`, `gemini -p "<task>"`), passing the table's model ID with the CLI's model flag only if the CLI accepts it; otherwise use the CLI's default model and say so.
+4. **None reach the route:** use the nearest Claude model through a subagent (writing and multimodal: `sonnet`; hard analysis: `opus`) and tell the user which route was substituted and why.
+
+`task_status`, `clientRequestId`, and `orchestrator_capabilities` are T3 Code features; skip them on other backends. A council reached only through Claude models must say its reviewers share a vendor.
 
 ## Classify
 
@@ -80,6 +91,6 @@ If a draft mixes prose with citations, quotes, figures, or legal or policy wordi
 - **Unclear class or stakes:** `claude-sonnet-5-5` (High). See Classify.
 - **Mixed request** (e.g. write a doc about this code): split it. Run dependent parts in sequence and pass each verified output to the next child. Run independent parts in parallel. The router labels conflicts between parts and orders them. It does not merge them silently or re-answer them.
 - Each `delegate_task` gets a unique `clientRequestId`. Relay the child's final output verbatim with one line naming the model used. Exceptions: writing routes relay the humanized text, not the raw child output. If the user asked for exact-format output (JSON, CSV, "only X"), relay the output unchanged and name the model in one line before it.
-- **Fallback:** if a delegate fails with an unknown model or provider, run `orchestrator_capabilities` and choose the closest live model in the same class that has the required tools and modalities. Keep an explicit user provider choice if it is live. If none is live, fall back to `claude-opus-5-5`. Tell the user which route broke and why.
+- **Fallback:** if a delegate fails with an unknown model or provider, run `orchestrator_capabilities` (or, without T3 Code, check the backends above) and choose the closest live model in the same class that has the required tools and modalities. Keep an explicit user provider choice if it is live. If none is live, fall back to `claude-opus-5-5`. Tell the user which route broke and why.
 - Don't re-answer a delegated task yourself.
 - **Auditing a routing table or model choice:** use a model from a different vendor than any model the audit recommends for itself.

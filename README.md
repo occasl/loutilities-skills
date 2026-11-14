@@ -50,7 +50,16 @@ Start a request with a prefix to force the route. The prefix is stripped before 
 
 ### Requirements
 
-- `route` delegates through T3 Code's `t3-code` MCP tools: `delegate_task`, `task_status`, and `orchestrator_capabilities`. Without T3 Code it can only answer directly.
+`route` hands off through the first backend it finds:
+
+| Backend | Reaches | Notes |
+|---|---|---|
+| [T3 Code](https://github.com/pingdotgg/t3code) (`t3-code` MCP tools) | Every provider in one catalog | Recommended. Best way to have Claude, Codex, and Gemini in one tool. |
+| Claude Code subagents | Haiku, Sonnet, Opus | Works in plain Claude Code, nothing to install. |
+| `codex` / `gemini` CLIs | OpenAI and Gemini models | Called from the shell when installed. Clunkier than T3 Code, but enables cross-vendor reviews. |
+
+If a route's provider isn't reachable, `route` uses the nearest Claude model and tells you which route it substituted.
+
 - It also needs access to the model IDs it names: `claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-5-5`, `gpt-6.1-sol`, `gpt-6-astra`, `gemini-4-argon-high`, and a few others.
 - The `route` skill is the one that names specific model IDs and providers (`claudeAgent`, `codex`, `antigravity`). They match the author's setup. Edit `skills/route/SKILL.md` to match the providers and models you have.
 
